@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ranking Liga – Menos é Mais</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ocean:#0a7ea4; --ocean-dark:#065f7a;
+    --coral:#ff6b4a; --gold:#f5c518;
+    --silver:#b0b8c1; --bronze:#cd7f32;
+    --dark:#1a1a2e; --purple:#8b5cf6; --red:#ef4444;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:'Nunito',sans-serif;
+    background:linear-gradient(160deg,#0a7ea4 0%,#065f7a 40%,#1a1a2e 100%);
+    min-height:100vh; padding-bottom:80px; overflow-x:hidden;
+  }
+  body::before{
+    content:'';position:fixed;inset:0;
+    background-image:radial-gradient(circle,rgba(255,255,255,.05) 1px,transparent 1px);
+    background-size:32px 32px;pointer-events:none;z-index:0;
+  }
+  .wrapper{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:0 16px;}
+
+  /* HEADER */
+  header{text-align:center;padding:36px 0 20px;}
+  .logo-badge{
+    display:inline-flex;align-items:center;gap:10px;
+    background:linear-gradient(135deg,#f5c518,#ff9f1c);
+    border-radius:50px;padding:8px 22px;margin-bottom:10px;
+    box-shadow:0 4px 20px rgba(245,197,24,.4);
+  }
+  .logo-badge span{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:#1a1a2e;letter-spacing:2px;}
+  h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.8rem,8vw,4.2rem);color:#fff;letter-spacing:4px;line-height:1;text-shadow:0 4px 20px rgba(0,0,0,.4);}
+  h1 span{color:var(--gold);}
+  .subtitle{font-size:.85rem;color:rgba(255,255,255,.65);letter-spacing:3px;text-transform:uppercase;margin-top:4px;}
+
+  /* ETAPAS */
+  .etapa-bar{
+    display:flex;align-items:center;justify-content:space-between;
+    background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);
+    backdrop-filter:blur(8px);border-radius:14px;
+    padding:12px 18px;margin:18px 0 6px;gap:10px;flex-wrap:wrap;
+  }
+  .etapa-bar .label{color:rgba(255,255,255,.75);font-size:.82rem;text-transform:uppercase;letter-spacing:1px;}
+  .etapa-pills{display:flex;gap:6px;}
+  .etapa-pill{
+    width:32px;height:32px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:900;font-size:.8rem;
+    border:2px solid rgba(255,255,255,.3);color:rgba(255,255,255,.4);background:transparent;
+  }
+  .etapa-pill.done{background:var(--purple);color:#fff;border-color:var(--purple);box-shadow:0 0 10px rgba(139,92,246,.5);}
+  .etapa-pill.current{background:var(--coral);color:#fff;border-color:var(--coral);box-shadow:0 0 12px var(--coral);}
+  .etapa-info{color:#fff;font-weight:700;font-size:.9rem;}
+
+  .legend{display:flex;gap:16px;margin:8px 0 4px;padding:0 2px;flex-wrap:wrap;}
+  .legend-item{display:flex;align-items:center;gap:5px;font-size:.78rem;color:rgba(255,255,255,.75);font-weight:700;}
+  .legend-dot{width:10px;height:10px;border-radius:50%;}
+  .legend-dot.purple{background:var(--purple);}
+  .legend-dot.red{background:var(--red);}
+
+  /* STATS */
+  .stats-row{display:flex;gap:10px;margin:14px 0;}
+  .stat-card{flex:1;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:12px 10px;text-align:center;backdrop-filter:blur(6px);}
+  .stat-num{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold);line-height:1;}
+  .stat-lbl{font-size:.72rem;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+
+  /* ADMIN BAR */
+  .admin-bar{
+    display:flex;gap:10px;margin:14px 0;flex-wrap:wrap;
+  }
+  .btn{
+    flex:1;min-width:100px;padding:11px 16px;
+    border:none;border-radius:12px;
+    font-family:'Nunito',sans-serif;font-weight:800;font-size:.85rem;
+    cursor:pointer;transition:all .2s;letter-spacing:.5px;
+  }
+  .btn-primary{background:var(--coral);color:#fff;box-shadow:0 4px 14px rgba(255,107,74,.4);}
+  .btn-primary:hover{transform:translateY(-2px);}
+  .btn-secondary{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);}
+  .btn-secondary:hover{background:rgba(255,255,255,.25);}
+  .btn-gold{background:linear-gradient(135deg,#f5c518,#ff9f1c);color:#1a1a2e;}
+  .btn-gold:hover{transform:translateY(-2px);}
+  .btn-dark{background:#1a1a2e;color:#fff;}
+  .btn-danger{background:#ff4444;color:#fff;}
+  .btn-sm{padding:7px 14px;font-size:.78rem;border-radius:8px;min-width:auto;flex:none;}
+
+  /* LOGIN BAR */
+  .login-bar{
+    display:flex;align-items:center;justify-content:flex-end;gap:10px;
+    margin-bottom:6px;
+  }
+  .admin-badge{
+    background:rgba(139,92,246,.25);border:1px solid rgba(139,92,246,.4);
+    border-radius:50px;padding:5px 14px;
+    font-size:.78rem;font-weight:800;color:#c4b5fd;
+    display:flex;align-items:center;gap:6px;
+  }
+  .login-btn{
+    background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);
+    border-radius:50px;padding:5px 14px;
+    font-size:.78rem;font-weight:800;color:rgba(255,255,255,.7);
+    cursor:pointer;transition:all .2s;font-family:'Nunito',sans-serif;
+  }
+  .login-btn:hover{background:rgba(255,255,255,.22);}
+
+  /* RANKING */
+  .ranking-list{display:flex;flex-direction:column;gap:10px;margin-top:8px;}
+  .rank-card{background:rgba(255,255,255,.95);border-radius:16px;box-shadow:0 4px 18px rgba(0,0,0,.12);overflow:hidden;cursor:pointer;transition:box-shadow .2s;}
+  .rank-card:hover{box-shadow:0 8px 28px rgba(0,0,0,.18);}
+  .rank-card-main{display:flex;align-items:center;gap:14px;padding:14px 16px;position:relative;}
+  .rank-card-main::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;}
+  .pos-1 .rank-card-main::before{background:var(--gold);}
+  .pos-2 .rank-card-main::before{background:var(--silver);}
+  .pos-3 .rank-card-main::before{background:var(--bronze);}
+  .pos-other .rank-card-main::before{background:linear-gradient(180deg,#0a7ea4,#065f7a);}
+  .rank-num{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;min-width:36px;text-align:center;line-height:1;}
+  .pos-1 .rank-num{color:var(--gold);}
+  .pos-2 .rank-num{color:var(--silver);}
+  .pos-3 .rank-num{color:var(--bronze);}
+  .pos-other .rank-num{color:#999;}
+  .avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#0a7ea4,#065f7a);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:900;color:#fff;flex-shrink:0;border:3px solid #e0e0e0;text-transform:uppercase;}
+  .pos-1 .avatar{border-color:var(--gold);box-shadow:0 0 12px rgba(245,197,24,.4);}
+  .pos-2 .avatar{border-color:var(--silver);}
+  .pos-3 .avatar{border-color:var(--bronze);}
+  .rank-info{flex:1;}
+  .rank-name{font-weight:900;font-size:1rem;color:#1a1a2e;}
+  .rank-bar-row{display:flex;align-items:center;gap:8px;margin-top:4px;}
+  .rank-bar-bg{flex:1;height:6px;background:#e8e8e8;border-radius:10px;overflow:hidden;}
+  .rank-bar-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,#0a7ea4,var(--coral));transition:width .6s;}
+  .rank-pts{font-size:.82rem;font-weight:900;color:var(--purple);white-space:nowrap;}
+  .expand-icon{font-size:.8rem;color:#bbb;transition:transform .3s;margin-left:4px;flex-shrink:0;}
+  .rank-card.open .expand-icon{transform:rotate(180deg);}
+
+  /* DETAIL */
+  .rank-detail{display:none;background:#f8f9ff;border-top:1px solid #e8eaf6;padding:14px 16px 16px;}
+  .rank-card.open .rank-detail{display:block;}
+  .detail-title{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:10px;}
+  .etapa-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;}
+  .etapa-cell{border-radius:10px;padding:8px 4px;text-align:center;background:#fff;border:1px solid #e8e8e8;min-height:66px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
+  .etapa-cell.future{background:#f0f0f0;opacity:.5;}
+  .etapa-label{font-size:.6rem;font-weight:800;color:#bbb;text-transform:uppercase;}
+  .etapa-date{font-size:.55rem;color:#ccc;}
+  .etapa-ranking-pts{font-size:.95rem;font-weight:900;color:var(--purple);}
+  .etapa-ranking-pts.zero{color:#ddd;}
+  .etapa-jogo-pts{font-size:.7rem;font-weight:700;color:var(--red);}
+  .etapa-dash{font-size:.75rem;color:#ddd;}
+  .detail-actions{margin-top:10px;display:flex;gap:8px;}
+
+  /* LOADING */
+  .loading{text-align:center;padding:40px;color:rgba(255,255,255,.7);}
+  .spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* MODAL */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);z-index:100;align-items:center;justify-content:center;padding:20px;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:#fff;border-radius:20px;padding:28px 24px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,.35);animation:popIn .25s ease;max-height:90vh;overflow-y:auto;}
+  @keyframes popIn{from{transform:scale(.88);opacity:0}to{transform:scale(1);opacity:1}}
+  .modal h2{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--ocean-dark);margin-bottom:4px;letter-spacing:2px;}
+  .modal-sub{font-size:.82rem;color:#888;margin-bottom:16px;}
+  .field{margin-bottom:10px;}
+  .field label{font-size:.75rem;font-weight:800;color:#555;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px;}
+  .field input{width:100%;padding:10px 14px;border:2px solid #e0e0e0;border-radius:10px;font-family:'Nunito',sans-serif;font-size:.95rem;color:#1a1a2e;outline:none;transition:border-color .2s;}
+  .field input:focus{border-color:var(--ocean);}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .etapa-block{margin-bottom:4px;}
+  .etapa-block-title{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#aaa;margin:12px 0 6px;display:flex;align-items:center;gap:6px;}
+  .pill{border-radius:50px;padding:2px 9px;font-size:.67rem;font-weight:800;}
+  .pill-done{background:#e8f5e9;color:#2e7d32;}
+  .pill-future{background:#f0f0f0;color:#aaa;}
+  .modal-actions{display:flex;gap:10px;margin-top:18px;}
+  .modal-actions .btn{flex:1;}
+
+  /* ETAPA MODAL */
+  .etapa-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f0f0f0;}
+  .etapa-row:last-child{border-bottom:none;}
+  .etapa-row-name{flex:1;font-weight:800;color:#1a1a2e;font-size:.88rem;}
+  .etapa-row-inputs{display:flex;gap:6px;}
+  .inp-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;}
+  .inp-wrap input{width:68px;padding:7px 6px;border:2px solid #e0e0e0;border-radius:8px;font-family:'Nunito',sans-serif;font-size:.85rem;text-align:center;outline:none;}
+  .inp-wrap input.purple-inp:focus{border-color:var(--purple);}
+  .inp-wrap input.red-inp:focus{border-color:var(--red);}
+  .inp-lbl{font-size:.6rem;font-weight:800;}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:10px 22px;border-radius:50px;font-weight:700;font-size:.88rem;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;}
+  .toast.show{opacity:1;}
+
+  @media(max-width:480px){
+    .etapa-grid{grid-template-columns:repeat(3,1fr);}
+    .rank-card-main{padding:11px 12px;gap:10px;}
+    .avatar{width:40px;height:40px;font-size:1rem;}
+    .rank-num{font-size:1.3rem;min-width:28px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <header>
+    <div class="logo-badge"><span>🏖️</span><span>Menos é Mais</span><span>🎾</span></div>
+    <h1>RANKING<br><span>LIGA</span></h1>
+    <p class="subtitle">Beach Tênis · Temporada 2026</p>
+  </header>
+
+  <div class="login-bar">
+    <div id="adminBadge" class="admin-badge" style="display:none">🔐 Admin</div>
+    <button class="login-btn" id="loginBtn" onclick="toggleLogin()">🔑 Entrar como Admin</button>
+  </div>
+
+  <div class="etapa-bar">
+    <span class="label">Etapas</span>
+    <div class="etapa-pills" id="etapaPills"></div>
+    <span class="etapa-info" id="etapaInfo"></span>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot purple"></div> Pts Ranking</div>
+    <div class="legend-item"><div class="legend-dot red"></div> Pts Jogo</div>
+    <div class="legend-item" style="color:rgba(255,255,255,.45);font-size:.7rem">· toque para ver detalhes</div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num" id="statJogadores">–</div><div class="stat-lbl">Jogadores</div></div>
+    <div class="stat-card"><div class="stat-num" id="statEtapas">–</div><div class="stat-lbl">Etapas</div></div>
+    <div class="stat-card"><div class="stat-num" id="statLider">–</div><div class="stat-lbl">Líder (pts)</div></div>
+  </div>
+
+  <!-- Admin controls -->
+  <div id="adminControls" style="display:none">
+    <div class="admin-bar">
+      <button class="btn btn-primary" onclick="openAddModal()">+ Jogador</button>
+      <button class="btn btn-gold" onclick="openEtapaModal()">⚡ Registrar Etapa</button>
+    </div>
+  </div>
+
+  <div id="loadingEl" class="loading">
+    <div class="spinner"></div>
+    Carregando ranking...
+  </div>
+
+  <div class="ranking-list" id="rankingList"></div>
+</div>
+
+<!-- MODAL: Login -->
+<div class="modal-overlay" id="loginOverlay">
+  <div class="modal">
+    <h2>Admin</h2>
+    <p class="modal-sub">Digite a senha para editar o ranking</p>
+    <div class="field">
+      <label>Senha</label>
+      <input type="password" id="inputSenha" placeholder="••••••••" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeLoginModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarLogin()">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add/Edit Jogador -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2 id="modalTitle">Adicionar Jogador</h2>
+    <p class="modal-sub">Dados do jogador</p>
+    <div class="field">
+      <label>Nome</label>
+      <input type="text" id="inputNome" placeholder="Ex: Helen" />
+    </div>
+    <div id="etapasFields"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-danger btn-sm" id="btnDeletar" onclick="deletarJogador()" style="display:none">🗑</button>
+      <button class="btn btn-primary" onclick="salvarJogador()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Nova Etapa -->
+<div class="modal-overlay" id="etapaOverlay">
+  <div class="modal">
+    <h2 id="etapaModalTitle">Etapa ?</h2>
+    <p class="modal-sub" id="etapaModalSub"></p>
+    <div style="display:flex;gap:14px;margin-bottom:12px;font-size:.75rem;font-weight:800;">
+      <span style="color:var(--purple)">🟣 Pts Ranking</span>
+      <span style="color:var(--red)">🔴 Pts Jogo</span>
+    </div>
+    <div id="etapaInputs"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeEtapaModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarEtapa()">✅ Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBNoX2cuAadJYKeufLRy3i6X73KnHRF0B4",
+  authDomain: "menos-e-mais-pro.firebaseapp.com",
+  projectId: "menos-e-mais-pro",
+  storageBucket: "menos-e-mais-pro.firebasestorage.app",
+  messagingSenderId: "44671040418",
+  appId: "1:44671040418:web:36782d4b02b437f4bf90fb"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ——— CONSTANTES ———
+const TOTAL_ETAPAS = 6;
+const ADMIN_SENHA = "menosemais2026"; // ← troque para sua senha
+const ETAPA_DATAS = {1:'13/03',2:'20/03',3:'27/03',4:'03/04',5:'10/04',6:'17/04'};
+
+const JOGADORES_INICIAIS = [
+  {id:'helen',     nome:'Helen',     etapas:{1:{ranking:80,jogo:24},  2:{ranking:100,jogo:36}, 3:{ranking:null,jogo:null},4:{ranking:null,jogo:null},5:{ranking:null,jogo:null},6:{ranking:null,jogo:null}}},
+  {id:'alexandre', nome:'Alexandre', etapas:{1:{ranking:100,jogo:29}, 2:{ranking:80,jogo:29},  3:{ranking:null,jogo:null},4:{ranking:null,jogo:null},5:{ranking:null,jogo:null},6:{ranking:null,jogo:null}}},
+  {id:'paula',     nome:'Paula',     etapas:{1:{ranking:100,jogo:29}, 2:{ranking:60,jogo:19},  3:{ranking:null,jogo:null},4:{ranking:null,jogo:null},5:{ranking:null,jogo:null},6:{ranking:null,jogo:null}}},
+  {id:'brunov',    nome:'Bruno V.',  etapas:{1:{ranking:0,jogo:0},    2:{ranking:100,jogo:30}, 3:{ranking:null,jogo:null},4:{ranking:null,jogo:null},5:{ranking:null,jogo:null},6:{ranking:null,jogo:null}}},
+  {id:'silvia',    nome:'Silvia',    etapas:{1:{ranking:20,jogo:11},  2:{ranking:80,jogo:30},  3:{ranking:null,jogo:null},4:{ranking:null,jogo:null},5:{ranking:null,jogo:null},6:{ranking:null,jogo:null}}},
+  {id:'mariany',   nome:'Mariany',   etapas:{1:{ranking:60,jogo:16},  2:{ranking:20,jogo:12},  3:{ranking:null,jogo:null},4:{ranking:null,jogo:null},5:{ranking:null,jogo:null},6:{ranking:null,jogo:null}}},
+  {id:'fernanda',  nome:'Fernanda',  etapas:{1:{ranking:80,jogo:24},  2:{ranking:20,jogo:14},  3:{ranking:null,jogo:null},4:{ranking:null,jogo:null},5:{ranking:null,jogo:null},6:{ranking:null,jogo:null}}},
+  {id:'bruno',     nome:'Bruno',     etapas:{1:{ranking:60,jogo:14},  2:{ranking:60,jogo:24},  3:{ranking:null,jogo:null},4:{ranking:null,jogo:null},5:{ranking:null,jogo:null},6:{ranking:null,jogo:null}}},
+  {id:'nayara',    nome:'Nayara',    etapas:{1:{ranking:20,jogo:10},  2:{ranking:60,jogo:23},  3:{ranking:null,jogo:null},4:{ranking:null,jogo:null},5:{ranking:null,jogo:null},6:{ranking:null,jogo:null}}},
+  {id:'bia',       nome:'Bia',       etapas:{1:{ranking:60,jogo:15},  2:{ranking:0,jogo:0},    3:{ranking:null,jogo:null},4:{ranking:null,jogo:null},5:{ranking:null,jogo:null},6:{ranking:null,jogo:null}}},
+  {id:'natan',     nome:'Natan',     etapas:{1:{ranking:60,jogo:14},  2:{ranking:0,jogo:0},    3:{ranking:null,jogo:null},4:{ranking:null,jogo:null},5:{ranking:null,jogo:null},6:{ranking:null,jogo:null}}},
+  {id:'joao',      nome:'João',      etapas:{1:{ranking:0,jogo:0},    2:{ranking:60,jogo:24},  3:{ranking:null,jogo:null},4:{ranking:null,jogo:null},5:{ranking:null,jogo:null},6:{ranking:null,jogo:null}}},
+  {id:'duda',      nome:'Duda',      etapas:{1:{ranking:0,jogo:0},    2:{ranking:20,jogo:14},  3:{ranking:null,jogo:null},4:{ranking:null,jogo:null},5:{ranking:null,jogo:null},6:{ranking:null,jogo:null}}},
+  {id:'day',       nome:'Day',       etapas:{1:{ranking:20,jogo:4},   2:{ranking:0,jogo:0},    3:{ranking:null,jogo:null},4:{ranking:null,jogo:null},5:{ranking:null,jogo:null},6:{ranking:null,jogo:null}}},
+  {id:'jessica',   nome:'Jessica',   etapas:{1:{ranking:0,jogo:0},    2:{ranking:20,jogo:12},  3:{ranking:null,jogo:null},4:{ranking:null,jogo:null},5:{ranking:null,jogo:null},6:{ranking:null,jogo:null}}},
+  {id:'mariana',   nome:'Mariana',   etapas:{1:{ranking:0,jogo:0},    2:{ranking:0,jogo:0},    3:{ranking:null,jogo:null},4:{ranking:null,jogo:null},5:{ranking:null,jogo:null},6:{ranking:null,jogo:null}}},
+  {id:'fabi',      nome:'Fabi',      etapas:{1:{ranking:0,jogo:0},    2:{ranking:0,jogo:0},    3:{ranking:null,jogo:null},4:{ranking:null,jogo:null},5:{ranking:null,jogo:null},6:{ranking:null,jogo:null}}},
+  {id:'michele',   nome:'Michele',   etapas:{1:{ranking:0,jogo:0},    2:{ranking:0,jogo:0},    3:{ranking:null,jogo:null},4:{ranking:null,jogo:null},5:{ranking:null,jogo:null},6:{ranking:null,jogo:null}}},
+];
+
+// ——— STATE ———
+let jogadores = [];
+let config = { etapasFeitas: 2 };
+let isAdmin = false;
+let openCards = new Set();
+let editingId = null;
+
+// ——— INIT ———
+async function init() {
+  // Verifica se o banco está vazio e faz seed inicial
+  const snap = await getDocs(collection(db, 'jogadores'));
+  if (snap.empty) {
+    showToast('⏳ Populando banco de dados...');
+    for (const j of JOGADORES_INICIAIS) {
+      await setDoc(doc(db, 'jogadores', j.id), { nome: j.nome, etapas: j.etapas });
+    }
+    await setDoc(doc(db, 'config', 'liga'), { etapasFeitas: 2 });
+    showToast('✅ Dados carregados!');
+  }
+
+  // Listener em tempo real
+  onSnapshot(collection(db, 'jogadores'), snap => {
+    jogadores = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderRanking();
+    renderStats();
+  });
+
+  onSnapshot(doc(db, 'config', 'liga'), snap => {
+    if (snap.exists()) config = snap.data();
+    renderEtapas();
+    renderStats();
+  });
+
+  document.getElementById('loadingEl').style.display = 'none';
+}
+
+// ——— HELPERS ———
+function totalRanking(j) {
+  let s = 0;
+  for (let i = 1; i <= TOTAL_ETAPAS; i++) {
+    const e = j.etapas && j.etapas[i];
+    if (e && e.ranking !== null && e.ranking !== undefined) s += e.ranking;
+  }
+  return s;
+}
+
+function mkEtapas() {
+  const e = {};
+  for (let i = 1; i <= TOTAL_ETAPAS; i++) e[i] = { ranking: null, jogo: null };
+  return e;
+}
+
+// ——— RENDER ———
+function renderEtapas() {
+  const pills = document.getElementById('etapaPills');
+  pills.innerHTML = '';
+  const ef = config.etapasFeitas || 0;
+  for (let i = 1; i <= TOTAL_ETAPAS; i++) {
+    const d = document.createElement('div');
+    d.className = 'etapa-pill' + (i <= ef ? ' done' : '');
+    if (i === ef) d.classList.add('current');
+    d.textContent = i;
+    d.title = ETAPA_DATAS[i] || '';
+    pills.appendChild(d);
+  }
+  document.getElementById('etapaInfo').textContent = `${ef}/${TOTAL_ETAPAS} realizadas`;
+}
+
+function renderStats() {
+  const sorted = [...jogadores].sort((a, b) => totalRanking(b) - totalRanking(a));
+  document.getElementById('statJogadores').textContent = jogadores.length;
+  document.getElementById('statEtapas').textContent = config.etapasFeitas || 0;
+  document.getElementById('statLider').textContent = sorted.length ? totalRanking(sorted[0]) + 'p' : '–';
+}
+
+function renderRanking() {
+  const list = document.getElementById('rankingList');
+  list.innerHTML = '';
+  const sorted = [...jogadores].sort((a, b) => totalRanking(b) - totalRanking(a));
+  const maxPts = sorted.length ? totalRanking(sorted[0]) || 1 : 1;
+  const ef = config.etapasFeitas || 0;
+
+  sorted.forEach((j, i) => {
+    const pos = i + 1;
+    const total = totalRanking(j);
+    const posClass = pos === 1 ? 'pos-1' : pos === 2 ? 'pos-2' : pos === 3 ? 'pos-3' : 'pos-other';
+    const medal = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : '';
+    const barW = Math.round((total / maxPts) * 100);
+    const initials = j.nome.split(' ').map(x => x[0]).slice(0, 2).join('').toUpperCase();
+    const isOpen = openCards.has(j.id);
+
+    let cells = '';
+    for (let e = 1; e <= TOTAL_ETAPAS; e++) {
+      const et = j.etapas && j.etapas[e];
+      const future = e > ef;
+      if (future) {
+        cells += `<div class="etapa-cell future"><div class="etapa-label">E${e}</div><div class="etapa-date">${ETAPA_DATAS[e]}</div><div class="etapa-dash">–</div></div>`;
+      } else {
+        const rp = et && et.ranking !== null && et.ranking !== undefined ? et.ranking : 0;
+        const jp = et && et.jogo !== null && et.jogo !== undefined ? et.jogo : null;
+        cells += `
+          <div class="etapa-cell">
+            <div class="etapa-label">E${e}</div>
+            <div class="etapa-date">${ETAPA_DATAS[e]}</div>
+            <div class="etapa-ranking-pts${rp === 0 ? ' zero' : ''}">${rp}p</div>
+            ${jp !== null ? `<div class="etapa-jogo-pts">${jp}j</div>` : '<div class="etapa-dash">–</div>'}
+          </div>`;
+      }
+    }
+
+    const card = document.createElement('div');
+    card.className = `rank-card ${posClass}${isOpen ? ' open' : ''}`;
+    card.innerHTML = `
+      <div class="rank-card-main">
+        <div class="rank-num">${medal || pos}</div>
+        <div class="avatar">${initials}</div>
+        <div class="rank-info">
+          <div class="rank-name">${j.nome}</div>
+          <div class="rank-bar-row">
+            <div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${barW}%"></div></div>
+            <span class="rank-pts">${total}p</span>
+          </div>
+        </div>
+        <div class="expand-icon">▼</div>
+      </div>
+      <div class="rank-detail">
+        <div class="detail-title">🟣 pts ranking &nbsp;·&nbsp; 🔴 pts jogo</div>
+        <div class="etapa-grid">${cells}</div>
+        ${isAdmin ? `<div class="detail-actions"><button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();openAddModal('${j.id}')">✏️ Editar</button></div>` : ''}
+      </div>`;
+
+    card.addEventListener('click', e => {
+      if (e.target.closest('button')) return;
+      if (isOpen) openCards.delete(j.id); else openCards.add(j.id);
+      renderRanking();
+    });
+    list.appendChild(card);
+  });
+}
+
+// ——— LOGIN ———
+window.toggleLogin = function() {
+  if (isAdmin) {
+    isAdmin = false;
+    document.getElementById('adminBadge').style.display = 'none';
+    document.getElementById('loginBtn').textContent = '🔑 Entrar como Admin';
+    document.getElementById('adminControls').style.display = 'none';
+    renderRanking();
+    showToast('👋 Saiu do modo admin');
+  } else {
+    document.getElementById('loginOverlay').classList.add('open');
+    setTimeout(() => document.getElementById('inputSenha').focus(), 50);
+  }
+};
+
+window.closeLoginModal = function() {
+  document.getElementById('loginOverlay').classList.remove('open');
+  document.getElementById('inputSenha').value = '';
+};
+
+window.confirmarLogin = function() {
+  const senha = document.getElementById('inputSenha').value;
+  if (senha === ADMIN_SENHA) {
+    isAdmin = true;
+    closeLoginModal();
+    document.getElementById('adminBadge').style.display = 'flex';
+    document.getElementById('loginBtn').textContent = '🚪 Sair';
+    document.getElementById('adminControls').style.display = 'block';
+    renderRanking();
+    showToast('✅ Modo admin ativado!');
+  } else {
+    showToast('❌ Senha incorreta');
+    document.getElementById('inputSenha').value = '';
+    document.getElementById('inputSenha').focus();
+  }
+};
+
+// ——— MODAL ADD/EDIT ———
+window.openAddModal = function(id = null) {
+  editingId = id;
+  const j = id ? jogadores.find(x => x.id === id) : null;
+  const ef = config.etapasFeitas || 0;
+  document.getElementById('modalTitle').textContent = id ? `Editar: ${j.nome}` : 'Adicionar Jogador';
+  document.getElementById('inputNome').value = j ? j.nome : '';
+  document.getElementById('btnDeletar').style.display = id ? '' : 'none';
+
+  const wrap = document.getElementById('etapasFields');
+  wrap.innerHTML = '';
+  for (let e = 1; e <= TOTAL_ETAPAS; e++) {
+    const future = e > ef;
+    const et = j && j.etapas && j.etapas[e] ? j.etapas[e] : { ranking: null, jogo: null };
+    wrap.innerHTML += `
+      <div class="etapa-block">
+        <div class="etapa-block-title">
+          Etapa ${e} · ${ETAPA_DATAS[e] || ''}
+          <span class="pill ${future ? 'pill-future' : 'pill-done'}">${future ? 'Futura' : '✓ Realizada'}</span>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label style="color:var(--purple)">🟣 Pts Ranking</label>
+            <input type="number" id="e${e}_ranking" min="0"
+              value="${et.ranking !== null && et.ranking !== undefined ? et.ranking : ''}"
+              placeholder="–" ${future ? 'disabled style="opacity:.4"' : ''}/>
+          </div>
+          <div class="field">
+            <label style="color:var(--red)">🔴 Pts Jogo</label>
+            <input type="number" id="e${e}_jogo" min="0"
+              value="${et.jogo !== null && et.jogo !== undefined ? et.jogo : ''}"
+              placeholder="–" ${future ? 'disabled style="opacity:.4"' : ''}/>
+          </div>
+        </div>
+      </div>`;
+  }
+  document.getElementById('modalOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('inputNome').focus(), 50);
+};
+
+window.closeModal = function() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  editingId = null;
+};
+
+window.salvarJogador = async function() {
+  const nome = document.getElementById('inputNome').value.trim();
+  if (!nome) { showToast('⚠️ Informe o nome'); return; }
+
+  const etapas = {};
+  for (let e = 1; e <= TOTAL_ETAPAS; e++) {
+    const rv = document.getElementById(`e${e}_ranking`).value;
+    const jv = document.getElementById(`e${e}_jogo`).value;
+    etapas[e] = {
+      ranking: rv === '' ? null : parseInt(rv),
+      jogo: jv === '' ? null : parseInt(jv)
+    };
+  }
+
+  const id = editingId || nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '_') + '_' + Date.now();
+  await setDoc(doc(db, 'jogadores', id), { nome, etapas });
+  closeModal();
+  showToast(editingId ? '✅ Jogador atualizado!' : '✅ Jogador adicionado!');
+};
+
+window.deletarJogador = async function() {
+  if (!editingId || !confirm('Remover este jogador?')) return;
+  await deleteDoc(doc(db, 'jogadores', editingId));
+  openCards.delete(editingId);
+  closeModal();
+  showToast('🗑 Jogador removido');
+};
+
+// ——— MODAL ETAPA ———
+window.openEtapaModal = function() {
+  const ef = config.etapasFeitas || 0;
+  const next = ef + 1;
+  if (next > TOTAL_ETAPAS) { showToast('🏁 Todas as etapas já registradas!'); return; }
+  document.getElementById('etapaModalTitle').textContent = `Etapa ${next}`;
+  document.getElementById('etapaModalSub').textContent = `Sexta-feira · ${ETAPA_DATAS[next] || ''}`;
+
+  const sorted = [...jogadores].sort((a, b) => totalRanking(b) - totalRanking(a));
+  const wrap = document.getElementById('etapaInputs');
+  wrap.innerHTML = '';
+  sorted.forEach(j => {
+    wrap.innerHTML += `
+      <div class="etapa-row">
+        <div class="etapa-row-name">${j.nome}</div>
+        <div class="etapa-row-inputs">
+          <div class="inp-wrap">
+            <input class="purple-inp" type="number" data-id="${j.id}" data-type="ranking" placeholder="0" min="0"/>
+            <div class="inp-lbl" style="color:var(--purple)">rank</div>
+          </div>
+          <div class="inp-wrap">
+            <input class="red-inp" type="number" data-id="${j.id}" data-type="jogo" placeholder="0" min="0"/>
+            <div class="inp-lbl" style="color:var(--red)">jogo</div>
+          </div>
+        </div>
+      </div>`;
+  });
+  document.getElementById('etapaOverlay').classList.add('open');
+};
+
+window.closeEtapaModal = function() {
+  document.getElementById('etapaOverlay').classList.remove('open');
+};
+
+window.confirmarEtapa = async function() {
+  const ef = config.etapasFeitas || 0;
+  const next = ef + 1;
+
+  const updates = {};
+  document.querySelectorAll('#etapaInputs input').forEach(inp => {
+    const id = inp.dataset.id;
+    const type = inp.dataset.type;
+    const val = inp.value === '' ? null : parseInt(inp.value);
+    if (!updates[id]) updates[id] = {};
+    updates[id][type] = val;
+  });
+
+  for (const [id, vals] of Object.entries(updates)) {
+    const j = jogadores.find(x => x.id === id);
+    if (!j) continue;
+    const etapas = { ...j.etapas };
+    etapas[next] = { ranking: vals.ranking ?? null, jogo: vals.jogo ?? null };
+    await setDoc(doc(db, 'jogadores', id), { nome: j.nome, etapas });
+  }
+
+  await setDoc(doc(db, 'config', 'liga'), { etapasFeitas: next });
+  closeEtapaModal();
+  showToast(`🏆 Etapa ${next} (${ETAPA_DATAS[next]}) registrada!`);
+};
+
+// ——— TOAST ———
+window.showToast = function(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+};
+
+// ——— KEYBOARD ———
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeLoginModal();
+    closeModal();
+    closeEtapaModal();
+  }
+  if (e.key === 'Enter') {
+    if (document.getElementById('loginOverlay').classList.contains('open')) confirmarLogin();
+    if (document.getElementById('modalOverlay').classList.contains('open')) salvarJogador();
+  }
+});
+document.getElementById('loginOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeLoginModal(); });
+document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+document.getElementById('etapaOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeEtapaModal(); });
+
+init();
+</script>
+</body>
+</html>
